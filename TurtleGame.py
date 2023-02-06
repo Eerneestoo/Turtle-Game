@@ -10,6 +10,7 @@ class GameState:
         self.refresh_text_timer = 0
         self.previous_time = datetime.datetime.now()
         self.text = Turtle()
+        self.text.hideturtle()
         self.text.penup()
         self.text.setposition((0,350))
         self.text.write(arg="{}".format(120 - int(self.game_timer/1000)),font=("Arial", 64, "normal"))
