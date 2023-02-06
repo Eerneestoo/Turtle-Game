@@ -1,7 +1,7 @@
 from turtle import Turtle, Screen
 import random
-
-bias = 7
+import datetime
+from datetime import timedelta
 
 win = Screen()
 win.colormode(255)
@@ -13,13 +13,15 @@ players = []
 characters = []
 
 class Player:
-    def __init__(self,color,position,players,characters):
+    def __init__(self,color,position,players,characters,):
+        self.bias = 7
         self.state = { "direction": "", "key_pressed": False }
         self.player = Turtle()
         self.player.shape("turtle")
         self.player.color(color[0],color[1],color[2])
         self.player.penup()
         self.player.setposition(position[0],position[1])
+        
 
         players.append(self)
         characters.append(self)
@@ -95,22 +97,7 @@ p2_key_state = { "direction": "", "key_pressed": False }
 player_speed = 15
 sensetivity = 15
 
-def playerStops(state):
-    state["direction"] = ""
-    state["key_pressed"] = False
-def playerUpStarts(state):
-    state["direction"] = "up"
-    state["key_pressed"] = True
-def playerDownStarts(state):
-    state["direction"] = "down"
-    state["key_pressed"] = True
-def playerLeftStarts(state):
-    state["direction"] = "left"
-    state["key_pressed"] = True
-def playerRightStarts(state):
-    state["direction"] = "right"
-    state["key_pressed"] = True
-
+previous_text = None
 
 def speed1():
     global player_speed
@@ -158,7 +145,9 @@ win.onkey(speed9,"9")
 win.onkey(speedr,"r")
 win.onkey(speedmore,"m")
 
-    
+previous_time = datetime.datetime.now()
+dt = 0
+
 def process_events():
     for player in players:
         if player.state["direction"] == "up":
@@ -177,19 +166,37 @@ def process_events():
     food_pos_x = characters[2].pos()[0]
     food_pos_y = characters[2].pos()[1]
 
-    if bias >= abs(p1_pos_x - food_pos_x) and bias >= abs(p1_pos_y - food_pos_y):
+    if players[0].bias >= abs(p1_pos_x - food_pos_x) and players[0].bias >= abs(p1_pos_y - food_pos_y):
         current_size = players[0].get_size()
-        players[0].resize(current_size[0]+2,current_size[1]+2,current_size[2])
+        players[0].resize(current_size[0]+1,current_size[1]+1,current_size[2])
+        players[0].bias = players[0].bias + 20
         characters[2].setposition(random.randrange(-1*screen_size[0]*0.5,screen_size[0]*0.5),\
                           random.randrange(-1*screen_size[1]*0.5,screen_size[1]*0.5))   
 
-    if bias >= abs(p2_pos_x - food_pos_x) and bias >= abs(p2_pos_y - food_pos_y):
+    if players[1].bias >= abs(p2_pos_x - food_pos_x) and players[1].bias >= abs(p2_pos_y - food_pos_y):
         current_size = players[1].get_size()
-        players[1].resize(current_size[0]+2,current_size[1]+2,current_size[2])
+        players[1].resize(current_size[0]+1,current_size[1]+1,current_size[2])
+        players[1].bias = players[1].bias + 20
         characters[2].setposition(random.randrange(-1*screen_size[0]*0.5,screen_size[0]*0.5),\
                           random.randrange(-1*screen_size[1]*0.5,screen_size[1]*0.5)) 
-        
-    win.ontimer(process_events, 1)
+
+    global previous_time
+    global dt
+    global previous_text
+
+    current_time = datetime.datetime.now()
+    delta = current_time - previous_time
+    dt = dt + delta.total_seconds()*1000
+    previous_time = current_time
+
+    if dt > 2000:
+        print(delta)
+        dt = 0
+
+        if previous_text != None:
+            previous_text.clear()
+
+    win.ontimer(process_events)
     
 process_events()
 
